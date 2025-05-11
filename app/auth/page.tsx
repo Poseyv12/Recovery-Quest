@@ -1,6 +1,6 @@
 // app/auth/page.tsx (Next.js 15 App Router)
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
@@ -11,6 +11,26 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
+
+  // Check if user is already signed in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data } = await supabase.auth.getUser()
+        if (data.user) {
+          // User is already signed in, redirect to dashboard
+          router.push('/dashboard')
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error)
+      } finally {
+        setPageLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [router])
 
   const handleAuth = async () => {
     setError(null)
@@ -32,6 +52,15 @@ export default function AuthPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Show loading state while checking authentication
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
 
   return (

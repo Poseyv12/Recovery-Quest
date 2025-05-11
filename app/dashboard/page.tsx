@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import TasksPanel from './componets/TaskPannel'
 import TeamPanel from './componets/TeamPannel'
 import DashboardSkeleton from './componets/DashboardSkeleton'
@@ -162,6 +163,9 @@ export default function DashboardPage() {
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
               🔥 Streak: {userInfo?.current_streak ?? 0} days
             </span>
+            <Link href="/badges" className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold hover:bg-purple-200 transition-colors">
+              🏆 View All Badges
+            </Link>
           </p>
         </div>
       </div>
