@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Recovery Quest",
   },
   icons: {
-    apple: "/app_icon.png"
+    apple: "/images/app_icon.png"
   }
 };
 
