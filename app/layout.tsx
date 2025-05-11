@@ -25,8 +25,12 @@ export const metadata: Metadata = {
     title: "Recovery Quest",
   },
   icons: {
-    apple: "/images/app_icon.png"
-  }
+    apple: "/images/app_icon.png",
+    other: {
+      rel: "icon",
+      url: "/images/app_icon.png",
+    },
+  },
 };
 
 export default function RootLayout({

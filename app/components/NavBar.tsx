@@ -39,7 +39,7 @@ export default function NavBar() {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-sm">
+    <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex">
