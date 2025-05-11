@@ -10,6 +10,7 @@ import {
 import { supabase } from '@/lib/supabaseClient'
 import { format } from 'date-fns'
 import { TeamPanelSkeleton } from './DashboardSkeleton'
+import Image from 'next/image'
 
 // Define types for our data structures
 interface Team {
@@ -31,6 +32,7 @@ interface ActivityEntry {
   completed_at: string
   users?: {
     username: string
+    profile_photo?: string
   }
   tasks?: {
     title: string
@@ -73,6 +75,8 @@ export default function TeamPanel() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [teams, setTeams] = useState<Team[]>([])
+  const [filteredTeams, setFilteredTeams] = useState<Team[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [joiningTeamId, setJoiningTeamId] = useState<string | null>(null)
   const [activity, setActivity] = useState<ActivityEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -98,6 +102,7 @@ export default function TeamPanel() {
           
           setTeam(team)
           setTeams(teams || [])
+          setFilteredTeams(teams || [])
           setActivity(activity || [])
           // Ensure timestamp is properly handled as a Date object
           setLastUpdated(new Date(timestamp))
@@ -179,7 +184,7 @@ export default function TeamPanel() {
           if (memberIds.length > 0) {
             const { data: fetchedActivity } = await supabase
               .from('completed_tasks')
-              .select('id, user_id, task_id, points_awarded, completed_at, users(username), tasks(title)')
+              .select('id, user_id, task_id, points_awarded, completed_at, users(username, profile_photo), tasks(title)')
               .in('user_id', memberIds)
               .order('completed_at', { ascending: false })
               .limit(10)
@@ -195,6 +200,7 @@ export default function TeamPanel() {
         const { data: allTeams } = await supabase.from('teams').select('*')
         teamsData = allTeams as Team[] || []
         setTeams(teamsData)
+        setFilteredTeams(teamsData)
       }
       
       // Update the cache with fresh data - use updatedTeam that has the total_xp property
@@ -211,6 +217,18 @@ export default function TeamPanel() {
   const handleRefresh = () => {
     fetchTeamData(true); // Force refresh
   }
+  
+  // Filter teams based on search query
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredTeams([]);
+    } else {
+      const filtered = teams.filter(team => 
+        team.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredTeams(filtered);
+    }
+  }, [searchQuery, teams]);
   
   useEffect(() => {
     const init = async () => {
@@ -376,10 +394,27 @@ export default function TeamPanel() {
                     className="text-xs sm:text-sm text-gray-700 bg-gray-50 px-2 sm:px-3 py-1.5 sm:py-2 rounded shadow-sm"
                   >
                     <div className="flex flex-wrap justify-between gap-1">
-                      <div className="flex-1 min-w-0">
-                        <span className="font-medium">{entry.users?.username}</span> completed{' '}
-                        <span className="font-medium">&quot;{entry.tasks?.title}&quot;</span> —{' '}
-                        <span className="text-green-600 font-semibold">+{entry.points_awarded} XP</span>
+                      <div className="flex-1 min-w-0 flex items-center gap-2">
+                        <div className="flex-shrink-0 h-6 w-6 rounded-full overflow-hidden relative">
+                          {entry.users?.profile_photo ? (
+                            <Image 
+                              src={entry.users.profile_photo} 
+                              alt={`${entry.users.username}'s avatar`}
+                              fill
+                              sizes="24px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full bg-blue-100 flex items-center justify-center text-blue-500 text-xs font-bold">
+                              {entry.users?.username.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <span className="font-medium">{entry.users?.username}</span> completed{' '}
+                          <span className="font-medium">&quot;{entry.tasks?.title}&quot;</span> —{' '}
+                          <span className="text-green-600 font-semibold">+{entry.points_awarded} XP</span>
+                        </div>
                       </div>
                       <span className="text-xs text-gray-400 shrink-0">
                         {formatTimeAgo(new Date(entry.completed_at))}
@@ -456,30 +491,49 @@ export default function TeamPanel() {
           {teams.length > 0 && (
             <div className="mt-4 sm:mt-6">
               <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">Or join an existing team:</h3>
-              <ul className="space-y-3 sm:space-y-4">
-                {teams.map((t) => (
-                  <li
-                    key={t.id}
-                    className="border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 hover:shadow-md transition"
-                  >
-                    <div>
-                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{t.name}</p>
-                      <p className="text-xs sm:text-sm text-gray-500">{t.description}</p>
-                    </div>
-                    <button
-                      onClick={() => handleJoin(t.id)}
-                      disabled={joiningTeamId === t.id}
-                      className={`w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-md font-medium transition ${
-                        joiningTeamId === t.id
-                          ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700 text-white'
-                      }`}
+              
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Search teams by name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full border border-gray-300 p-2 rounded focus:outline-blue-400 text-sm sm:text-base"
+                />
+              </div>
+              
+              {filteredTeams.length > 0 ? (
+                <ul className="space-y-3 sm:space-y-4">
+                  {filteredTeams.map((t) => (
+                    <li
+                      key={t.id}
+                      className="border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 hover:shadow-md transition"
                     >
-                      {joiningTeamId === t.id ? 'Joining...' : 'Join'}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                      <div>
+                        <p className="font-semibold text-gray-800 text-sm sm:text-base">{t.name}</p>
+                        <p className="text-xs sm:text-sm text-gray-500">{t.description}</p>
+                      </div>
+                      <button
+                        onClick={() => handleJoin(t.id)}
+                        disabled={joiningTeamId === t.id}
+                        className={`w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-md font-medium transition ${
+                          joiningTeamId === t.id
+                            ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        {joiningTeamId === t.id ? 'Joining...' : 'Join'}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  {searchQuery.trim() === '' 
+                    ? "Enter a team name to search for existing teams" 
+                    : `No teams found matching "${searchQuery}"`}
+                </p>
+              )}
             </div>
           )}
   
