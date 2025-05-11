@@ -142,7 +142,8 @@ export default function DashboardPage() {
                 alt="Profile"
                 width={48}
                 height={48}
-                className="rounded-full border-2 border-gray-300 group-hover:brightness-90 transition"
+                className="rounded-full border-2 border-gray-300 group-hover:brightness-90 transition object-cover"
+                style={{ width: '48px', height: '48px' }}
               />
               <input
                 type="file"
