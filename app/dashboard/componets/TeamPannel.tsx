@@ -316,9 +316,9 @@ export default function TeamPanel() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-blue-700">Team Panel</h2>
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 space-y-4 sm:space-y-6">
+      <div className="flex flex-wrap justify-between items-center gap-2">
+        <h2 className="text-xl sm:text-2xl font-semibold text-blue-700">Team Panel</h2>
         <div className="flex items-center gap-2">
           {lastUpdated && (
             <span className="text-xs text-gray-500">
@@ -343,19 +343,19 @@ export default function TeamPanel() {
       )}
   
       {team ? (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <p className="text-gray-800">
+            <p className="text-gray-800 text-sm sm:text-base">
               You&apos;re on <span className="font-semibold">{team.name}</span>
             </p>
-            <p className="text-green-700 text-sm">
+            <p className="text-green-700 text-xs sm:text-sm">
               🧠 Total Team XP: <span className="font-bold">{team.total_xp}</span>
             </p>
-            <p className="text-gray-500 text-sm italic">{team.description}</p>
+            <p className="text-gray-500 text-xs sm:text-sm italic">{team.description}</p>
             <button
               onClick={handleLeave}
               disabled={isLeaving}
-              className={`mt-2 text-sm transition ${
+              className={`mt-1 sm:mt-2 text-xs sm:text-sm transition ${
                 isLeaving 
                 ? "text-gray-400 cursor-not-allowed" 
                 : "text-red-600 hover:underline"
@@ -367,20 +367,24 @@ export default function TeamPanel() {
   
           {/* Activity Feed */}
           {activity.length > 0 && (
-            <div className="pt-4 border-t border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">📰 Team Activity</h3>
-              <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
+            <div className="pt-3 sm:pt-4 border-t border-gray-100">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">📰 Team Activity</h3>
+              <ul className="space-y-2 max-h-56 sm:max-h-64 overflow-y-auto pr-1">
                 {activity.map((entry) => (
                   <li
                     key={entry.id}
-                    className="text-sm text-gray-700 bg-gray-50 px-3 py-2 rounded shadow-sm"
+                    className="text-xs sm:text-sm text-gray-700 bg-gray-50 px-2 sm:px-3 py-1.5 sm:py-2 rounded shadow-sm"
                   >
-                    <span className="font-medium">{entry.users?.username}</span> completed{' '}
-                    <span className="font-medium">&quot;{entry.tasks?.title}&quot;</span> —{' '}
-                    <span className="text-green-600 font-semibold">+{entry.points_awarded} XP</span>
-                    <span className="ml-2 text-xs text-gray-400">
-                      {formatTimeAgo(new Date(entry.completed_at))}
-                    </span>
+                    <div className="flex flex-wrap justify-between gap-1">
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{entry.users?.username}</span> completed{' '}
+                        <span className="font-medium">&quot;{entry.tasks?.title}&quot;</span> —{' '}
+                        <span className="text-green-600 font-semibold">+{entry.points_awarded} XP</span>
+                      </div>
+                      <span className="text-xs text-gray-400 shrink-0">
+                        {formatTimeAgo(new Date(entry.completed_at))}
+                      </span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -396,19 +400,20 @@ export default function TeamPanel() {
                 placeholder="Team name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded focus:outline-blue-400"
+                className="w-full border border-gray-300 p-2 rounded focus:outline-blue-400 text-sm sm:text-base"
               />
               <textarea
                 placeholder="Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded focus:outline-blue-400"
+                className="w-full border border-gray-300 p-2 rounded focus:outline-blue-400 text-sm sm:text-base"
+                rows={3}
               />
               <div className="flex gap-2">
                 <button
                   onClick={handleCreate}
                   disabled={!name.trim() || creating}
-                  className={`flex-1 px-4 py-2 rounded-md font-medium transition ${
+                  className={`flex-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-medium transition text-xs sm:text-sm ${
                     !name.trim() || creating
                       ? 'bg-gray-400 cursor-not-allowed text-white'
                       : 'bg-green-600 hover:bg-green-700 text-white'
@@ -426,14 +431,14 @@ export default function TeamPanel() {
                     setError(null)
                   }}
                   disabled={creating}
-                  className={`px-4 py-2 rounded-md font-medium transition ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-medium transition text-xs sm:text-sm ${
                     creating ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                   }`}
                 >
                   Cancel
                 </button>
               </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {error && <p className="text-red-500 text-xs sm:text-sm">{error}</p>}
             </div>
           ) : (
             <button
@@ -442,29 +447,29 @@ export default function TeamPanel() {
                 setCreationMode(true)
                 setCreating(false)
               }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md transition text-xs sm:text-sm"
             >
               Create a Team
             </button>
           )}
   
           {teams.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">Or join an existing team:</h3>
-              <ul className="space-y-4">
+            <div className="mt-4 sm:mt-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">Or join an existing team:</h3>
+              <ul className="space-y-3 sm:space-y-4">
                 {teams.map((t) => (
                   <li
                     key={t.id}
-                    className="border border-gray-200 rounded-lg p-4 shadow-sm flex justify-between items-center hover:shadow-md transition"
+                    className="border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 hover:shadow-md transition"
                   >
                     <div>
-                      <p className="font-semibold text-gray-800">{t.name}</p>
-                      <p className="text-sm text-gray-500">{t.description}</p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{t.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">{t.description}</p>
                     </div>
                     <button
                       onClick={() => handleJoin(t.id)}
                       disabled={joiningTeamId === t.id}
-                      className={`px-4 py-2 text-sm rounded-md font-medium transition ${
+                      className={`w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-md font-medium transition ${
                         joiningTeamId === t.id
                           ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
                           : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -478,7 +483,7 @@ export default function TeamPanel() {
             </div>
           )}
   
-          {error && <p className="text-red-500 mt-4 text-sm">{error}</p>}
+          {error && <p className="text-red-500 mt-3 sm:mt-4 text-xs sm:text-sm">{error}</p>}
         </>
       )}
     </div>

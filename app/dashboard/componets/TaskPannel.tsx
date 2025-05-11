@@ -50,8 +50,8 @@ export default function TasksPanel({
   if (isLoading) {
     return (
       <>
-        <h2 className="text-2xl font-semibold text-blue-700 mb-4">Today&apos;s Tasks</h2>
-        <ul className="grid sm:grid-cols-2 gap-5">
+        <h2 className="text-xl sm:text-2xl font-semibold text-blue-700 mb-3 sm:mb-4">Today&apos;s Tasks</h2>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           {[...Array(4)].map((_, index) => (
             <TaskItemSkeleton key={index} />
           ))}
@@ -64,10 +64,10 @@ export default function TasksPanel({
   if (tasks.length === 0) {
     return (
       <>
-        <h2 className="text-2xl font-semibold text-blue-700 mb-4">Today&apos;s Tasks</h2>
-        <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200 text-center">
+        <h2 className="text-xl sm:text-2xl font-semibold text-blue-700 mb-3 sm:mb-4">Today&apos;s Tasks</h2>
+        <div className="bg-white rounded-xl shadow-md p-4 sm:p-8 border border-gray-200 text-center">
           <svg 
-            className="w-16 h-16 mx-auto text-gray-400 mb-4"
+            className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-gray-400 mb-3 sm:mb-4"
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24" 
@@ -80,8 +80,8 @@ export default function TasksPanel({
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No Tasks Available</h3>
-          <p className="text-gray-500">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">No Tasks Available</h3>
+          <p className="text-gray-500 text-sm sm:text-base">
             You don&apos;t have any tasks for today. Check back later!
           </p>
         </div>
@@ -91,18 +91,18 @@ export default function TasksPanel({
 
   return (
     <>
-      <h2 className="text-2xl font-semibold text-blue-700 mb-4">Today&apos;s Tasks</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold text-blue-700 mb-3 sm:mb-4">Today&apos;s Tasks</h2>
       
       {/* Congratulations Popup */}
       {showPopup && completedTask && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4 text-center animate-bounce-in">
-            <div className="text-3xl mb-2">🎉</div>
-            <h3 className="text-xl font-bold text-blue-700 mb-2">Congratulations!</h3>
-            <p className="text-gray-700 mb-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 px-4">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 max-w-md w-full text-center animate-bounce-in">
+            <div className="text-2xl sm:text-3xl mb-2">🎉</div>
+            <h3 className="text-lg sm:text-xl font-bold text-blue-700 mb-2">Congratulations!</h3>
+            <p className="text-gray-700 mb-3 sm:mb-4 text-sm sm:text-base">
               You earned <span className="font-bold text-green-600">+{completedTask.points} XP</span>!
             </p>
-            <p className="text-gray-700 mb-4">{encouragingMessage}</p>
+            <p className="text-gray-700 mb-3 sm:mb-4 text-sm sm:text-base">{encouragingMessage}</p>
             <button 
               onClick={() => setShowPopup(false)}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -113,15 +113,15 @@ export default function TasksPanel({
         </div>
       )}
       
-      <ul className="grid sm:grid-cols-2 gap-5">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         {tasks.map((task) => (
-          <li key={task.id} className="bg-white rounded-xl shadow-md p-5 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
-            <p className="text-sm text-gray-500 mb-3">{task.description}</p>
+          <li key={task.id} className="bg-white rounded-xl shadow-md p-4 sm:p-5 border border-gray-200">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">{task.title}</h3>
+            <p className="text-xs sm:text-sm text-gray-500 mb-3">{task.description}</p>
             <button
               onClick={() => onCompleteTask(task)}
               disabled={completedToday.has(task.id) || pendingTasks.has(task.id)}
-              className={`w-full py-2 rounded-md font-medium transition-colors duration-200 ${
+              className={`w-full py-2 rounded-md font-medium transition-colors duration-200 text-sm sm:text-base ${
                 completedToday.has(task.id)
                   ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                   : pendingTasks.has(task.id)

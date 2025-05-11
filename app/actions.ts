@@ -99,6 +99,40 @@ export async function completeTask(taskId: string, points: number) {
   })
   if (xpError) throw xpError
 
+  const today = new Date().toISOString().split('T')[0]
+
+const { data: userData } = await supabase
+  .from('users')
+  .select('last_checkin_date, current_streak')
+  .eq('id', user.id)
+  .single()
+
+const lastCheckin = userData?.last_checkin_date
+const streak = userData?.current_streak || 0
+
+let newStreak = streak
+let updateNeeded = false
+
+if (!lastCheckin || new Date(lastCheckin).toDateString() !== new Date(today).toDateString()) {
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+
+  const wasYesterday = new Date(lastCheckin).toDateString() === yesterday.toDateString()
+
+  newStreak = wasYesterday ? streak + 1 : 1
+  updateNeeded = true
+}
+
+if (updateNeeded) {
+  await supabase
+    .from('users')
+    .update({
+      current_streak: newStreak,
+      last_checkin_date: today,
+    })
+    .eq('id', user.id)
+}
+
   const { data: updatedUser, error: userError } = await supabase
     .from('users')
     .select('*')

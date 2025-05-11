@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import TasksPanel from './componets/TaskPannel'
 import TeamPanel from './componets/TeamPannel'
-import NavMenu from './componets/NavMenu'
-import LeaderboardPanel from './componets/LeaderboardPanel'
 import DashboardSkeleton from './componets/DashboardSkeleton'
-import { getDashboardData, completeTask, type Task, type LeaderboardEntry, type User, getTeamLeaderboardData, getUserTeam } from '../actions'
+import { getDashboardData, completeTask, type Task, type User} from '../actions'
 import { getXpBadge } from '@/lib/xpBadges'
 import { supabase } from '@/lib/supabaseClient'
 export default function DashboardPage() {
@@ -16,9 +14,7 @@ export default function DashboardPage() {
   const [completedToday, setCompletedToday] = useState<Set<string>>(new Set())
   const [view, setView] = useState<'tasks' | 'team'>('tasks')
   const [loading, setLoading] = useState(true)
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([])
   const [pendingTasks, setPendingTasks] = useState<Set<string>>(new Set())
-  const [userTeamId, setUserTeamId] = useState<string | null>(null)
 
   // Helper to clear team cache when completing tasks to keep team data fresh
   const clearTeamCache = () => {
@@ -32,16 +28,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [dashboardData, leaderboard, userTeam] = await Promise.all([
-          getDashboardData(),
-          getTeamLeaderboardData(),
-          getUserTeam()
-        ])
+        const dashboardData = await getDashboardData()
         setUserInfo(dashboardData.userInfo)
         setTasks(dashboardData.tasks)
         setCompletedToday(new Set(dashboardData.completedToday))
-        setLeaderboardData(leaderboard)
-        setUserTeamId(userTeam?.id || null)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
         window.location.href = '/auth'
@@ -142,29 +132,29 @@ export default function DashboardPage() {
   if (loading) return <DashboardSkeleton />
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 min-h-screen bg-gradient-to-b from-blue-50 to-gray-100">
-      <div className="mb-8 flex justify-between items-start">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-8 min-h-screen bg-gradient-to-b from-blue-50 to-gray-100">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
-        <div className="flex items-center gap-3 mb-2">
-  <label className="relative group cursor-pointer">
-    <Image
-      src={userInfo?.profile_photo || '/images/default-avatar.png'}
-      alt="Profile"
-      width={48}
-      height={48}
-      className="rounded-full border-2 border-gray-300 group-hover:brightness-90 transition"
-    />
-    <input
-      type="file"
-      accept="image/*"
-      onChange={handleProfilePhotoChange}
-      className="absolute inset-0 opacity-0 cursor-pointer"
-    />
-  </label>
-  <h1 className="text-4xl font-extrabold text-gray-800">Welcome, {userInfo?.username}</h1>
-</div>
-          <h2 className="text-2xl font-bold text-gray-600 mb-2">Your Badge: {getXpBadge(userInfo?.xp ?? 0)}</h2>
-          <p className="text-lg text-gray-600 flex gap-4">
+          <div className="flex items-center gap-3 mb-2">
+            <label className="relative group cursor-pointer">
+              <Image
+                src={userInfo?.profile_photo || '/images/default-avatar.png'}
+                alt="Profile"
+                width={48}
+                height={48}
+                className="rounded-full border-2 border-gray-300 group-hover:brightness-90 transition"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePhotoChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </label>
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-800 break-words">{userInfo?.username}</h1>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-600 mb-2">Your Badge: {getXpBadge(userInfo?.xp ?? 0)}</h2>
+          <p className="text-base sm:text-lg text-gray-600 flex flex-wrap gap-2 sm:gap-4">
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">
               ⭐ XP: {userInfo?.xp ?? 0}
             </span>
@@ -173,16 +163,12 @@ export default function DashboardPage() {
             </span>
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <LeaderboardPanel initialData={leaderboardData} userTeamId={userTeamId} />
-          <NavMenu />
-        </div>
       </div>
 
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-2 sm:gap-4 mb-6">
         <button
           onClick={() => setView('tasks')}
-          className={`px-4 py-2 rounded-md font-semibold transition ${
+          className={`px-3 sm:px-4 py-2 rounded-md font-semibold transition flex-1 sm:flex-none text-center ${
             view === 'tasks' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
           }`}
         >
@@ -190,7 +176,7 @@ export default function DashboardPage() {
         </button>
         <button
           onClick={() => setView('team')}
-          className={`px-4 py-2 rounded-md font-semibold transition ${
+          className={`px-3 sm:px-4 py-2 rounded-md font-semibold transition flex-1 sm:flex-none text-center ${
             view === 'team' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'
           }`}
         >
