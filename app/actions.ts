@@ -38,6 +38,7 @@ export type User = {
   xp: number
   current_streak: number
   profile_photo?: string
+  sober_start_date?: string
 }
 
 // Fetch dashboard data
@@ -302,4 +303,82 @@ export async function getUserTeam() {
 
   if (error || !teamData?.team) return null
   return teamData.team as unknown as Team
+}
+
+// Update user's sobriety start date
+export async function updateSoberDate(soberDate: string) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) throw new Error('Not authenticated')
+
+  const { error } = await supabase
+    .from('users')
+    .update({ sober_start_date: soberDate })
+    .eq('id', user.id)
+
+  if (error) throw error
+
+  const { data: updatedUser, error: userError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+  
+  if (userError) throw userError
+
+  return updatedUser
+}
+
+// Remove user's sobriety start date
+export async function removeSoberDate() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) throw new Error('Not authenticated')
+
+  const { error } = await supabase
+    .from('users')
+    .update({ sober_start_date: null })
+    .eq('id', user.id)
+
+  if (error) throw error
+
+  const { data: updatedUser, error: userError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+  
+  if (userError) throw userError
+
+  return updatedUser
 }
