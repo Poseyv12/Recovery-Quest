@@ -37,14 +37,32 @@ export default function AuthPage() {
     setIsLoading(true)
     
     try {
-      const { error } = isLogin
+      const { error, data } = isLogin
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({ email, password })
 
       if (error) {
         setError(error.message)
       } else {
-        router.push('/onboarding') 
+        if (isLogin && data?.user) {
+          // Check if the user has already completed onboarding
+          const { data: existingProfile } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .single()
+          
+          if (existingProfile) {
+            // If profile exists, redirect directly to dashboard
+            router.push('/dashboard')
+          } else {
+            // If no profile, redirect to onboarding
+            router.push('/onboarding')
+          }
+        } else {
+          // For signup, always go to onboarding
+          router.push('/onboarding')
+        }
       }
     } catch (error: unknown) {
       console.error('Error signing in:', error)

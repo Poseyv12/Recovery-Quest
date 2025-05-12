@@ -26,12 +26,6 @@ export default async function Home() {
               >
                 Get Started
               </Link>
-              <Link 
-                href="/dashboard" 
-                className="px-8 py-3 rounded-full bg-white/10 text-white border border-white/30 backdrop-blur-sm font-medium hover:bg-white/20 transition-colors shadow-lg"
-              >
-                View Dashboard
-              </Link>
             </div>
           </div>
         </div>

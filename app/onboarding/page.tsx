@@ -10,6 +10,7 @@ export default function OnboardingPage() {
   const [soberDate, setSoberDate] = useState('')
   const [includeSoberDate, setIncludeSoberDate] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
@@ -30,6 +31,8 @@ export default function OnboardingPage() {
 
       if (existing) {
         router.push('/dashboard')
+      } else {
+        setPageLoading(false)
       }
     }
 
@@ -71,6 +74,15 @@ export default function OnboardingPage() {
     }
 
     setLoading(false)
+  }
+
+  // Show loading state while checking if redirect is needed
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
 
   return (
