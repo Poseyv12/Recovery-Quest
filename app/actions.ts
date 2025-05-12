@@ -14,6 +14,12 @@ export type DashboardData = {
   userInfo: User
   tasks: Task[]
   completedToday: string[]
+  dailyQuest?: {
+    title: string
+    storyline: string
+    bonus_xp: number
+    tasks: Task
+  }
 }
 
 export type LeaderboardEntry = {
@@ -66,10 +72,33 @@ export async function getDashboardData(): Promise<DashboardData> {
       .eq('completed_day', today),
   ])
 
+  // Fetch daily quest with its associated task
+  const { data: dailyQuest } = await supabase
+    .from('rpg_quests')
+    .select(`
+      id,
+      title,
+      storyline,
+      bonus_xp,
+      task:task_id (
+        id,
+        title,
+        description,
+        points
+      )
+    `)
+    .single()
+
   return {
     userInfo: profile.data,
     tasks: tasks.data || [],
     completedToday: completions.data?.map((t) => t.task_id) || [],
+    dailyQuest: dailyQuest && dailyQuest.task ? {
+      title: dailyQuest.title,
+      storyline: dailyQuest.storyline,
+      bonus_xp: dailyQuest.bonus_xp || 10,
+      tasks: Array.isArray(dailyQuest.task) ? dailyQuest.task[0] as Task : dailyQuest.task as Task
+    } : undefined
   }
 }
 
@@ -87,16 +116,29 @@ export async function completeTask(taskId: string, points: number) {
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
+  // Check if task is part of current quest
+  const { data: questData } = await supabase
+    .from('rpg_quests')
+    .select('bonus_xp')
+    .eq('task_id', taskId)
+    .single()
+
+  let totalPoints = points
+  if (questData) {
+    totalPoints += questData.bonus_xp || 10 // Add bonus XP if it's a quest task
+    console.log(`Quest task completed! Adding ${questData.bonus_xp || 10} bonus XP`)
+  }
+
   const { error: insertError } = await supabase.from('completed_tasks').insert({
     user_id: user.id,
     task_id: taskId,
-    points_awarded: points,
+    points_awarded: totalPoints,
   })
   if (insertError) throw insertError
 
   const { error: xpError } = await supabase.rpc('increment_user_xp', {
     uid: user.id,
-    xp_to_add: points,
+    xp_to_add: totalPoints,
   })
   if (xpError) throw xpError
 

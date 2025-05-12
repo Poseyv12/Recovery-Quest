@@ -6,7 +6,8 @@ import Link from 'next/link'
 import TasksPanel from './componets/TaskPannel'
 import TeamPanel from './componets/TeamPannel'
 import DashboardSkeleton from './componets/DashboardSkeleton'
-import { getDashboardData, completeTask, updateSoberDate, removeSoberDate, type Task, type User} from '../actions'
+import DailyQuest from './componets/DailyQuest'
+import { getDashboardData, completeTask, updateSoberDate, removeSoberDate, type Task, type User, type DashboardData} from '../actions'
 import { getXpBadge } from '@/lib/xpBadges'
 import { supabase } from '@/lib/supabaseClient'
 export default function DashboardPage() {
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const [pendingTasks, setPendingTasks] = useState<Set<string>>(new Set())
   const [showSoberDateModal, setShowSoberDateModal] = useState(false)
   const [soberDate, setSoberDate] = useState('')
+  const [dailyQuest, setDailyQuest] = useState<DashboardData['dailyQuest']>(undefined)
 
   // Helper to clear team cache when completing tasks to keep team data fresh
   const clearTeamCache = () => {
@@ -32,9 +34,12 @@ export default function DashboardPage() {
     const fetchData = async () => {
       try {
         const dashboardData = await getDashboardData()
+        console.log('Dashboard Data received:', dashboardData)
+        console.log('Daily Quest data:', dashboardData.dailyQuest)
         setUserInfo(dashboardData.userInfo)
         setTasks(dashboardData.tasks)
         setCompletedToday(new Set(dashboardData.completedToday))
+        setDailyQuest(dashboardData.dailyQuest)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
         window.location.href = '/auth'
@@ -308,13 +313,27 @@ export default function DashboardPage() {
       </div>
 
       {view === 'tasks' ? (
-        <TasksPanel
-          tasks={tasks}
-          completedToday={completedToday}
-          pendingTasks={pendingTasks}
-          handleCompleteTask={handleCompleteTask}
-          isLoading={loading}
-        />
+        <>
+          {(() => {
+            console.log('Current dailyQuest state:', dailyQuest)
+            return null
+          })()}
+          {dailyQuest && (
+            <DailyQuest
+              title={dailyQuest.title}
+              storyline={dailyQuest.storyline}
+              bonus_xp={dailyQuest.bonus_xp}
+              tasks={dailyQuest.tasks}
+            />
+          )}
+          <TasksPanel
+            tasks={tasks}
+            completedToday={completedToday}
+            pendingTasks={pendingTasks}
+            handleCompleteTask={handleCompleteTask}
+            isLoading={loading}
+          />
+        </>
       ) : (
         <TeamPanel />
       )}
